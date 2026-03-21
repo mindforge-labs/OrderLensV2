@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "../lib/amplify";
+import { AuthProvider } from "../lib/useAuth";
 
 export const metadata: Metadata = {
   title: "OrderLens - Retail Verification Suite",
@@ -32,7 +34,9 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-body antialiased">{children}</body>
+      <body className="font-body antialiased">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

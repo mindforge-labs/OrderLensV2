@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import Image from "next/image";
 import AppShell from "@/components/AppShell";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import {
   MENU_CATALOG,
   DEMO_ORDERS,
@@ -148,7 +149,8 @@ export default function PosTrayVerificationPage() {
   }, [currentOrder, imagePreview]);
 
   return (
-    <AppShell>
+    <ProtectedRoute>
+      <AppShell>
       <div className="p-6 flex flex-col gap-4 min-h-full">
         {/* Demo Controls */}
         <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -478,6 +480,7 @@ export default function PosTrayVerificationPage() {
           </div>
         </section>
       </div>
-    </AppShell>
+      </AppShell>
+    </ProtectedRoute>
   );
 }

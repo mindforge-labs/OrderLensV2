@@ -1,23 +1,27 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { Authenticator } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    router.push("/pos-tray-verification");
-  };
+  useEffect(() => {
+    // Redirect authenticated users to the main app
+    const checkAuth = async () => {
+      try {
+        const { getCurrentUser } = await import('aws-amplify/auth');
+        await getCurrentUser();
+        router.push("/pos-tray-verification");
+      } catch (error) {
+        // User not authenticated, stay on login page
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   return (
     <div className="bg-surface font-body text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen flex items-center justify-center relative overflow-hidden">
@@ -76,129 +80,47 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Right Column: Login Form */}
+        {/* Right Column: Cognito Authenticator */}
         <div className="w-full md:w-[440px]">
-          <Card className="p-10 shadow-[0px_32px_64px_-12px_rgba(0,0,0,0.04)] border-outline-variant/10">
-            <CardHeader className="mb-10 text-center md:text-left p-0">
-              <CardTitle className="text-2xl font-headline font-semibold tracking-tight">
-                Welcome Back
-              </CardTitle>
-              <CardDescription className="text-sm mt-2">
-                Enter your credentials to access the AI core.
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="p-0">
-              <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="space-y-2">
-                  <Label
-                    className="text-xs font-bold uppercase tracking-wider text-on-surface-variant/70 px-1"
-                    htmlFor="email"
-                  >
-                    Email or Username
-                  </Label>
-                  <Input
-                    className="bg-transparent border-0 border-b border-outline-variant py-3 px-1 placeholder:text-outline/50 focus:border-primary"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="administrator@clinical.ai"
-                    type="text"
-                  />
+          <Authenticator
+            signUpAttributes={['email']}
+            formFields={{
+              signIn: {
+                username: {
+                  placeholder: 'Enter your email',
+                  label: 'Email'
+                },
+                password: {
+                  placeholder: 'Enter your password'
+                }
+              },
+              signUp: {
+                email: {
+                  placeholder: 'Enter your email',
+                  label: 'Email',
+                  required: true
+                },
+                password: {
+                  placeholder: 'Create a password'
+                },
+                confirm_password: {
+                  placeholder: 'Confirm your password'
+                }
+              }
+            }}
+            components={{
+              Header: () => (
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-headline font-semibold tracking-tight text-on-surface">
+                    Welcome Back
+                  </h2>
+                  <p className="text-sm mt-2 text-on-surface-variant">
+                    Enter your credentials to access the AI core.
+                  </p>
                 </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center px-1">
-                    <Label
-                      className="text-xs font-bold uppercase tracking-wider text-on-surface-variant/70"
-                      htmlFor="password"
-                    >
-                      Password
-                    </Label>
-                    <Button
-                      variant="link"
-                      className="text-xs font-semibold text-primary hover:text-primary-container p-0 h-auto"
-                      type="button"
-                    >
-                      Forgot Password?
-                    </Button>
-                  </div>
-                  <div className="relative flex items-center">
-                    <Input
-                      className="bg-transparent border-0 border-b border-outline-variant py-3 px-1 placeholder:text-outline/50 focus:border-primary pr-10"
-                      id="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••••••"
-                      type={showPassword ? "text" : "password"}
-                    />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-1 text-outline-variant hover:text-on-surface-variant p-1 h-auto"
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      <span className="material-symbols-outlined text-xl">
-                        {showPassword ? "visibility_off" : "visibility"}
-                      </span>
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 bg-surface-container-low p-3 rounded-lg border border-outline-variant/5">
-                  <span
-                    className="material-symbols-outlined text-primary text-lg"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
-                    lock
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-[0.05em] text-on-surface-variant/60">
-                    Encrypted Session: Active
-                  </span>
-                </div>
-
-                <div className="space-y-4 pt-4">
-                  <Button
-                    className="w-full py-4 px-6 velocity-gradient text-on-primary font-semibold rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
-                    type="submit"
-                  >
-                    Sign In
-                    <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">
-                      arrow_forward
-                    </span>
-                  </Button>
-
-                  <div className="relative py-2">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-outline-variant/10"></div>
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-surface-container-lowest px-4 text-outline/60 font-medium">
-                        New to Curator?
-                      </span>
-                    </div>
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    className="w-full py-4 px-6 bg-surface-container-high text-primary font-semibold rounded-full hover:bg-surface-container-highest transition-all flex items-center justify-center"
-                    type="button"
-                  >
-                    Request System Access
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-
-            <div className="mt-8 pt-8 border-t border-outline-variant/10 flex justify-between items-center text-[11px] font-medium text-on-surface-variant/50">
-              <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                TERMINAL 04 ONLINE
-              </span>
-              <span>v2.4.0-STABLE</span>
-            </div>
-          </Card>
+              )
+            }}
+          />
         </div>
       </main>
 

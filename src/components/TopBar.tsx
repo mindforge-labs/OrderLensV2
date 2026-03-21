@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/useAuth";
 
 type NavItem = { label: string; href: string };
 
@@ -27,6 +28,7 @@ export default function TopBar({
   sidebarCollapsed = false,
 }: TopBarProps) {
   const pathname = usePathname();
+  const { user, signOutUser } = useAuth();
 
   return (
     <header className="w-full top-0 sticky bg-slate-50 border-b border-slate-200/50 shadow-sm z-50">
@@ -85,8 +87,16 @@ export default function TopBar({
             <button className="p-2 text-on-surface-variant hover:bg-slate-100 transition-colors rounded-full">
               <span className="material-symbols-outlined">settings</span>
             </button>
-            <div className="h-8 w-8 rounded-full overflow-hidden ml-2 border border-outline-variant/30 bg-primary-container flex items-center justify-center text-on-primary-container text-xs font-bold">
-              SA
+            <div className="flex items-center gap-2 ml-2">
+              <span className="text-sm text-on-surface-variant hidden sm:block">
+                {user?.email || 'User'}
+              </span>
+              <button
+                onClick={signOutUser}
+                className="px-3 py-1 text-xs font-medium text-primary hover:bg-primary/10 transition-colors rounded-md"
+              >
+                Logout
+              </button>
             </div>
           </div>
         </div>
