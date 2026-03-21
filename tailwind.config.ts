@@ -10,6 +10,39 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
         "on-secondary": "#ffffff",
         "error-container": "#ffdad6",
         "on-error-container": "#93000a",
@@ -24,7 +57,6 @@ const config: Config = {
         "on-primary": "#ffffff",
         "on-secondary-fixed-variant": "#304671",
         "on-error": "#ffffff",
-        primary: "#0058be",
         "surface-container-high": "#e7e8e9",
         "surface-bright": "#f8f9fa",
         surface: "#f8f9fa",
@@ -52,11 +84,9 @@ const config: Config = {
         "tertiary-container": "#b75b00",
         "on-tertiary": "#ffffff",
         "surface-container": "#edeeef",
-        background: "#f8f9fa",
         tertiary: "#924700",
         "outline-variant": "#c2c6d6",
         "on-primary-fixed": "#001a42",
-        secondary: "#495e8a",
       },
       fontFamily: {
         headline: ["Inter", "sans-serif"],
