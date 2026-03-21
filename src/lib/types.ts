@@ -151,7 +151,7 @@ export function compareOrder(
   const extraItems: ExtraItem[] = [];
   const quantityMismatches: QuantityMismatch[] = [];
 
-  for (const [productId, expected] of expectedMap.entries()) {
+  for (const [productId, expected] of Array.from(expectedMap.entries())) {
     const detected = detectedMap.get(productId);
     if (!detected) {
       missingItems.push({
@@ -181,7 +181,7 @@ export function compareOrder(
     }
   }
 
-  for (const [productId, detected] of detectedMap.entries()) {
+  for (const [productId, detected] of Array.from(detectedMap.entries())) {
     if (!expectedMap.has(productId)) {
       extraItems.push({
         productId,
