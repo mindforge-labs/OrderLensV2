@@ -9,6 +9,8 @@ interface TopBarProps {
   navItems?: NavItem[];
   showSearch?: boolean;
   searchPlaceholder?: string;
+  onToggleSidebar?: () => void;
+  sidebarCollapsed?: boolean;
 }
 
 const defaultNavItems: NavItem[] = [
@@ -21,6 +23,8 @@ export default function TopBar({
   navItems = defaultNavItems,
   showSearch = true,
   searchPlaceholder = "Search...",
+  onToggleSidebar,
+  sidebarCollapsed = false,
 }: TopBarProps) {
   const pathname = usePathname();
 
@@ -28,6 +32,17 @@ export default function TopBar({
     <header className="w-full top-0 sticky bg-slate-50 border-b border-slate-200/50 shadow-sm z-50">
       <div className="flex justify-between items-center w-full px-6 py-3">
         <div className="flex items-center gap-8">
+          {onToggleSidebar && (
+            <button
+              onClick={onToggleSidebar}
+              className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 transition-colors rounded-lg lg:hidden"
+              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <span className="material-symbols-outlined text-sm">
+                {sidebarCollapsed ? "menu" : "close"}
+              </span>
+            </button>
+          )}
           <Link href="/pos-tray-verification" className="text-xl font-bold tracking-tighter text-slate-900">
             OrderLens
           </Link>

@@ -86,7 +86,11 @@ export default function PosTrayVerificationPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+      setVerificationResult(null);
+      setError(null);
+    };
     reader.readAsDataURL(file);
   };
 
@@ -126,6 +130,7 @@ export default function PosTrayVerificationPage() {
       }
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : "Verification failed";
+      console.error(err);
       setError(errorMsg);
       setVerificationResult({
         success: false,
