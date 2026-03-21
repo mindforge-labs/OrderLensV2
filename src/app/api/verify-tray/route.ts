@@ -180,6 +180,13 @@ async function callGemini(
   menuCatalog: MenuItem[],
   expectedOrder: Order
 ): Promise<VerificationResult> {
+  console.log('🔍 DEBUG ENV VARS:');
+  console.log('GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? 'present' : 'MISSING');
+  console.log('NEXT_PUBLIC_COGNITO_USER_POOL_ID:', process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID ? 'present' : 'MISSING');
+  console.log('NEXT_PUBLIC_COGNITO_CLIENT_ID:', process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID ? 'present' : 'MISSING');
+  console.log('NEXT_PUBLIC_COGNITO_REGION:', process.env.NEXT_PUBLIC_COGNITO_REGION ? 'present' : 'MISSING');
+  console.log('All env keys containing GEMINI or COGNITO:', Object.keys(process.env).filter(k => k.includes('GEMINI') || k.includes('COGNITO')));
+
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     const detectedItems: DetectedItem[] = expectedOrder.items.map((item) => ({
