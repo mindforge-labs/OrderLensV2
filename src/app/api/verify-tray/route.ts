@@ -155,39 +155,33 @@ function buildUserPrompt(menuCatalog: MenuItem[], expectedOrder: Order): string 
   ].join("\n");
 }
 
-function toInlineImagePart(imageBase64: string) {
+function decodeBase64Image(imageBase64: string): { bytes: Buffer; format: string } {
+  let data: string;
+  let mimeType = "image/jpeg";
+
   if (imageBase64.startsWith("data:")) {
-    const [header, data] = imageBase64.split(",", 2);
-    const mimeType = header.split(":")[1]?.split(";")[0] ?? "image/jpeg";
-    return {
-      inline_data: {
-        mime_type: mimeType,
-        data,
-      },
-    };
+    const [header, base64Data] = imageBase64.split(",", 2);
+    data = base64Data;
+    mimeType = header.split(":")[1]?.split(";")[0] ?? "image/jpeg";
+  } else {
+    data = imageBase64;
   }
 
-  return {
-    inline_data: {
-      mime_type: "image/jpeg",
-      data: imageBase64,
-    },
-  };
+  const format = mimeType.split("/")[1] || "jpeg"; // jpeg, png, etc.
+  return { bytes: Buffer.from(data, 'base64'), format };
 }
 
-async function callGemini(
+async function callBedrock(
   imageBase64: string,
   menuCatalog: MenuItem[],
   expectedOrder: Order
 ): Promise<VerificationResult> {
   console.log('🔍 DEBUG ENV VARS:');
-  console.log('GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? 'present' : 'MISSING');
-  console.log('NEXT_PUBLIC_COGNITO_USER_POOL_ID:', process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID ? 'present' : 'MISSING');
-  console.log('NEXT_PUBLIC_COGNITO_CLIENT_ID:', process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID ? 'present' : 'MISSING');
-  console.log('NEXT_PUBLIC_COGNITO_REGION:', process.env.NEXT_PUBLIC_COGNITO_REGION ? 'present' : 'MISSING');
-  console.log('All env keys containing GEMINI or COGNITO:', Object.keys(process.env).filter(k => k.includes('GEMINI') || k.includes('COGNITO')));
+  console.log('BEDROCK_API_KEY:', process.env.BEDROCK_API_KEY ? 'present' : 'MISSING');
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.BEDROCK_API_KEY;
+  const region = 'us-east-1';
+
   if (!apiKey) {
     const detectedItems: DetectedItem[] = expectedOrder.items.map((item) => ({
       productId: item.productId,
@@ -203,48 +197,57 @@ async function callGemini(
       missingItems: [],
       extraItems: [],
       quantityMismatches: [],
-      notes: ["Gemini not configured; using local mock."],
+      notes: ["Bedrock not configured; using local mock."],
     };
   }
 
   const systemInstruction = buildSystemInstruction();
   const userPrompt = buildUserPrompt(menuCatalog, expectedOrder);
+  const { bytes: imageBytes, format: imageFormat } = decodeBase64Image(imageBase64);
+  const imageBase64ForAPI = imageBytes.toString('base64');
 
   try {
+    const modelId = "us.anthropic.claude-3-5-sonnet-20240620-v1:0";
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent" +
-        `?key=${apiKey}`,
+      `https://bedrock-runtime.${region}.amazonaws.com/model/${modelId}/converse`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          contents: [
+          messages: [
             {
               role: "user",
-              parts: [{ text: `${systemInstruction}\n\n${userPrompt}` }, toInlineImagePart(imageBase64)],
+              content: [
+                { text: `${systemInstruction}\n\n${userPrompt}` },
+                {
+                  image: {
+                    format: imageFormat,
+                    source: { bytes: imageBase64ForAPI },
+                  },
+                },
+              ],
             },
           ],
-          generationConfig: {
-            response_mime_type: "application/json",
+          inferenceConfig: {
+            temperature: 0.01,
           },
         }),
       }
     );
 
     if (!response.ok) {
-      console.error("Gemini HTTP error", response.status, await response.text());
+      console.error("Bedrock HTTP error", response.status, await response.text());
       return FALLBACK_RESPONSE;
     }
 
     const raw = await response.json();
-    const text: string | undefined =
-      raw?.candidates?.[0]?.content?.parts?.[0]?.text ??
-      raw?.candidates?.[0]?.content?.parts?.[0]?.json;
+    const text = raw.output?.message?.content?.[0]?.text;
 
     if (!text || typeof text !== "string") {
-      console.error("Gemini response missing text", raw);
+      console.error("Bedrock response missing text", raw);
       return FALLBACK_RESPONSE;
     }
 
@@ -254,18 +257,18 @@ async function callGemini(
     try {
       parsed = JSON.parse(cleaned);
     } catch (error) {
-      console.error("Failed to parse Gemini JSON", error, cleaned);
+      console.error("Failed to parse Bedrock JSON", error, cleaned);
       return FALLBACK_RESPONSE;
     }
 
     if (!parsed || !Array.isArray(parsed.detectedItems)) {
-      console.error("Parsed Gemini result invalid", parsed);
+      console.error("Parsed Bedrock result invalid", parsed);
       return FALLBACK_RESPONSE;
     }
 
     return parsed;
   } catch (error) {
-    console.error("Gemini call exception", error);
+    console.error("Bedrock call exception", error);
     return FALLBACK_RESPONSE;
   }
 }
@@ -286,7 +289,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await callGemini(imageBase64, menuCatalog, expectedOrder);
+    const result = await callBedrock(imageBase64, menuCatalog, expectedOrder);
     return NextResponse.json(result);
   } catch (error) {
     console.error("verify-tray route error:", error);
