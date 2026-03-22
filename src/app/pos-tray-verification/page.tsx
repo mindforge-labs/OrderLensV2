@@ -294,16 +294,6 @@ export default function PosTrayVerificationPage() {
                     />
                     {/* Scanning overlay */}
                     <div className="absolute inset-0 bg-primary/5 pointer-events-none">
-                      <div className="absolute top-1/4 left-1/3 w-24 h-24 border-2 border-primary rounded-lg flex items-start justify-start p-1 bg-primary/10">
-                        <span className="text-[8px] font-bold text-primary bg-white px-1 rounded uppercase">
-                          SNACK_RED
-                        </span>
-                      </div>
-                      <div className="absolute bottom-1/3 right-1/4 w-20 h-28 border-2 border-primary rounded-lg flex items-start justify-start p-1 bg-primary/10">
-                        <span className="text-[8px] font-bold text-primary bg-white px-1 rounded uppercase">
-                          WATER_500ML
-                        </span>
-                      </div>
                     </div>
                   </>
                 ) : (
