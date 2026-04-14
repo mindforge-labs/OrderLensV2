@@ -1,3 +1,4 @@
+![OrderLens](OrderLens.png)
 # OrderLens — Retail Verification Suite
 
 AI-powered tray verification and POS management system built with Next.js 14, TypeScript, and Tailwind CSS.
